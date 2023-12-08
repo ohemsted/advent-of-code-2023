@@ -48,10 +48,9 @@ const searchForMapping = (mapping, type, source) => {
 
   typeMatchingMapping.find(map => {
     const sourceEnd = map.sourceStart + map.rangeLength;
-    const inRange = (parsedSource >= map.sourceStart && parsedSource <= sourceEnd);
+    const inRange = (parsedSource >= map.sourceStart && parsedSource < sourceEnd);
     
     if (inRange) {
-      // console.log(`Input Number: ${source}, Start ${map.sourceStart}, End: ${sourceEnd}, DestinationStart: ${map.destinationStart}`)
       destinationId = source - map.sourceStart + map.destinationStart;
     } 
   });
@@ -59,7 +58,7 @@ const searchForMapping = (mapping, type, source) => {
 }
 
 const part1 = (rawInput) => {
-  let lowestLocationNumber;
+  let lowestLocationNumber = Infinity;
   const [seeds, mappings] = parseInput(rawInput);
 
   for (let seed in seeds) {
@@ -71,32 +70,25 @@ const part1 = (rawInput) => {
     const temperatureResult = searchForMapping(mappings, 'temperature', lightResult);
     const humidityResult = searchForMapping(mappings, 'humidity', temperatureResult);
 
-    if (!lowestLocationNumber) {
-      lowestLocationNumber = humidityResult;
-    } 
-    
-    if (lowestLocationNumber > humidityResult) {
-      lowestLocationNumber = humidityResult;
-    }
+    lowestLocationNumber = Math.min(lowestLocationNumber, humidityResult)
   }
+
   return lowestLocationNumber;
 };
 
 const part2 = (rawInput) => {
-  let lowestLocationNumber;
+  let lowestLocationNumber = Infinity;
   const [seeds, mappings] = parseInput(rawInput);
-  console.log();
-  console.log(seeds);
   const reversedSeeds = seeds.reverse();
-  // while (reversedSeeds.length) {
+  
+  while (reversedSeeds.length) {
+    console.log(`**** ${reversedSeeds.length / 2} SEEDS TO GO ****`)
     const numberToStart = parseInt(reversedSeeds.pop());
     const numberToGenerate = parseInt(reversedSeeds.pop());
-    console.log(`Start: ${numberToStart}`);
-    console.log(`End:   ${numberToGenerate}`);
-
+    
     for (let i = 0; i <= numberToGenerate; i++) {
       const newSeed = numberToStart + i;
-      newSeed % 1000000 === 0 ? console.log(newSeed, i) : null;
+      newSeed % 1000000 === 0 ? console.log(`Progress: ${i} / ${numberToGenerate}`) : null;
       const seedResult = searchForMapping(mappings, 'seed', newSeed);
       const soilResult = searchForMapping(mappings, 'soil', seedResult);
       const fertilizerResult = searchForMapping(mappings, 'fertilizer', soilResult);
@@ -104,18 +96,12 @@ const part2 = (rawInput) => {
       const lightResult = searchForMapping(mappings, 'light', waterResult);
       const temperatureResult = searchForMapping(mappings, 'temperature', lightResult);
       const humidityResult = searchForMapping(mappings, 'humidity', temperatureResult);
-
-      // humidityResult % 1000000 === 0 ? console.log(humidityResult) : null;
-      if (!lowestLocationNumber) {
-        lowestLocationNumber = humidityResult;
-      } 
       
-      if (lowestLocationNumber > humidityResult) {
-        lowestLocationNumber = humidityResult;
-      }
+      lowestLocationNumber = Math.min(lowestLocationNumber, humidityResult)
     } 
-  // }
-  return lowestLocationNumber - 1;
+  }
+
+  return lowestLocationNumber;
 };
 
 run({
@@ -202,5 +188,5 @@ humidity-to-location map:
     solution: part2,
   },
   trimTestInputs: true,
-  onlyTests: false,
+  onlyTests: true,
 });
